@@ -37,10 +37,7 @@ echo "----"
 # special commands for openmpi/intel
 module load openmpi/intel-opa/gcc/64/1.10.4-hfi
 
-
 export CC=/cm/local/apps/gcc/8.2.0/bin/gcc && export CXX=/cm/local/apps/gcc/8.2.0/bin/g++
-cd anonymity/build/ && /users/adjeufack/install/bin/cmake .. && make
-cd ../.. && cp anonymity/build/anonymity.so .
 
 #make clean all
 
