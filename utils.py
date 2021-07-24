@@ -71,125 +71,228 @@ def classic_seq_edit_distance(motif_1, motif_2):
             scores[i][j] = min(x, y, z)
 
     result = scores[motif_1_length][motif_2_length]
-    del scores
+    # del scores
 
-    return result
+    return scores
+
+
+def del_func(char):
+    return 1
+
+
+def ins_func(char):
+    return 1
 
 
 # filling of the Dr Table
-def dr_matrice_func(rows=10, columns=10):
+def dr_matrice_func(x):
+    motif = x
+    assert isinstance(motif, list)
+    assert isinstance(motif[0], str)
+
     dr_matrix = []
-    for i in range(rows):
+
+    row = len(motif)
+    column = len(motif[0])
+
+    # Initializing the scores list
+    for i in range(row):
         inter = []
-        for j in range(columns):
+        for j in range(column):
             inter.append(0)
         dr_matrix.append(inter)
 
-    for i in range(rows):
-        inter_matrix = []
-        for j in range(columns):
-            inter_matrix.append(j + 1)
-        dr_matrix.append(inter_matrix)
+    for i in range(0, row):
+        for j in range(0, column):
+            step = 0
+            for p in range(j):
+                substring = motif[i][p]
+                step += del_func(substring)
+            dr_matrix[i][j] = step
 
     return dr_matrix
 
 
-# Filling of Dc table
-def dc_matrice_func(rows=10, columns=10):
+# filling of the Dc Table
+def dc_matrice_func(x):
+    motif = x
+    assert isinstance(motif, list)
+    assert isinstance(motif[0], str)
+
     dc_matrix = []
-    for i in range(rows):
+
+    row = len(motif)
+    column = len(motif[0])
+
+    # Initializing the scores list
+    for i in range(row):
         inter = []
-        for j in range(columns):
+        for j in range(column):
             inter.append(0)
         dc_matrix.append(inter)
 
-    for i in range(rows):
-        for j in range(columns):
-            dc_matrix[i][j] = i + 1
+    for i in range(0, row):
+        for j in range(0, column):
+            step = 0
+            for p in range(i):
+                substring = motif[p][j]
+                step += del_func(substring)
+            dc_matrix[i][j] = step
 
     return dc_matrix
 
 
+# filling of the Ir Table
+def ir_matrice_func(y):
+    motif = y
+    assert isinstance(motif, list)
+    assert isinstance(motif[0], str)
+
+    ir_matrix = []
+
+    row = len(motif)
+    column = len(motif[0])
+
+    # Initializing the scores list
+    for i in range(row):
+        inter = []
+        for j in range(column):
+            inter.append(0)
+
+        ir_matrix.append(inter)
+
+    for i in range(0, row):
+        for j in range(0, column):
+            step = 0
+            for p in range(j):
+                substring = motif[i][p]
+                step += ins_func(substring)
+            ir_matrix[i][j] = step
+
+    return ir_matrix
+
+
+# filling of the Ic Table
+def ic_matrice_func(y):
+    motif = y
+    assert isinstance(motif, list)
+    assert isinstance(motif[0], str)
+
+    ic_matrix = []
+
+    row = len(motif)
+    column = len(motif[0])
+
+    # Initializing the scores list
+    for i in range(row):
+        inter = []
+        for j in range(column):
+            inter.append(0)
+        ic_matrix.append(inter)
+
+    for i in range(0, row):
+        for j in range(0, column):
+            step = 0
+            for p in range(i):
+                substring = motif[p][j]
+                step += del_func(substring)
+            ic_matrix[i][j] = step
+
+    return ic_matrix
+
+
+# Filling of Dc table
+# def dc_matrice_func(rows=10, columns=10):
+#     dc_matrix = []
+#     for i in range(rows):
+#         inter = []
+#         for j in range(columns):
+#             inter.append(0)
+#         dc_matrix.append(inter)
+#
+#     for i in range(rows):
+#         for j in range(columns):
+#             dc_matrix[i][j] = i + 1
+#
+#     return dc_matrix
+
+
 # Filling of R table
-def r_matrice_func(motif_1, motif_2):
-    r_matrice = []
-    assert isinstance(motif_1, list)
-    assert isinstance(motif_2, list)
+def r_matrice_func(x, y):
+    r_matrix = []
+
+    assert isinstance(x, list)
+    assert isinstance(y, list)
+
+    dr = dr_matrice_func(x)
+    ir = ir_matrice_func(y)
+
+    row_1 = len(x)
+    col_1 = len(x[0])
+    row_2 = len(y)
+    col_2 = len(y[0])
 
     # 4 dimension matrix initializations
-    for i in range(len(motif_1)):
-        assert isinstance(motif_1[0], str)
+    for i in range(row_1):
         inter_1 = []
-        for j in range(len(motif_1[0])):
+        for j in range(col_1):
             inter_2 = []
-            for k in range(len(motif_2)):
-                assert isinstance(motif_2[0], str)
+            for k in range(row_2):
                 inter_3 = []
-                for l in range(len(motif_2[0])):
+                for l in range(col_2):
                     inter_3.append(0)
                 inter_2.append(inter_3)
             inter_1.append(inter_2)
-        r_matrice.append(inter_1)
+        r_matrix.append(inter_1)
 
     # Building result
-    for i in range(len(motif_1)):
-        assert isinstance(motif_1[0], str)
-        for j in range(len(motif_1[0])):
-            for k in range(len(motif_2)):
-                assert isinstance(motif_2[0], str)
-                for l in range(len(motif_2[0])):
-                    r_matrice[i][j][k][l] = classic_seq_edit_distance(motif_1[i][0:j], motif_2[k][0:l])
+    for i in range(row_1):
+        for j in range(col_1):
+            for k in range(row_2):
+                for l in range(col_1):
+                    r_matrix[i][j][k][l] = dr[i][j] + ir[k][l]
+                    # r_matrice[i][j][k][l] = classic_seq_edit_distance(motif_1[i][0:j], motif_2[k][0:l])
 
-    return r_matrice
+    return r_matrix
 
 
 # Filling of C table
-def c_matrice_func(motif_1, motif_2):
-    c_matrice = []
-    assert isinstance(motif_1, list)
-    assert isinstance(motif_2, list)
+def c_matrice_func(x, y):
+    c_matrix = []
+
+    assert isinstance(x, list)
+    assert isinstance(y, list)
+
+    dc = dc_matrice_func(x)
+    ic = ic_matrice_func(y)
+
+    row_1 = len(x)
+    col_1 = len(x[0])
+    row_2 = len(y)
+    col_2 = len(y[0])
 
     # 4 dimension matrix initializations
-    for i in range(len(motif_1)):
-        assert isinstance(motif_1[0], str)
+    for i in range(row_1):
         inter_1 = []
-        for j in range(len(motif_1[0])):
+        for j in range(col_1):
             inter_2 = []
-            for k in range(len(motif_2)):
-                assert isinstance(motif_2[0], str)
+            for k in range(row_2):
                 inter_3 = []
-                for l in range(len(motif_2[0])):
+                for l in range(col_2):
                     inter_3.append(0)
                 inter_2.append(inter_3)
             inter_1.append(inter_2)
-        c_matrice.append(inter_1)
+        c_matrix.append(inter_1)
 
-    # Transpose first motif
-    trans_motif_1 = []
-    for i in range(len(motif_1[0])):
-        inter = ""
-        for j in range(len(motif_1)):
-            inter += str(motif_1[j][i])
-        trans_motif_1.append(inter)
-    # print(trans_motif_1)
-    # Transpose second motif
-    trans_motif_2 = []
-    for i in range(len(motif_2[0])):
-        inter = ""
-        for j in range(len(motif_2)):
-            inter += str(motif_2[j][i])
-        trans_motif_2.append(inter)
-    # print(trans_motif_2)
     # Building result
-    for i in range(len(motif_1)):
-        assert isinstance(motif_1[0], str)
-        for j in range(len(motif_1[0])):
-            for k in range(len(motif_2)):
-                assert isinstance(motif_2[0], str)
-                for l in range(len(motif_2[0])):
-                    c_matrice[i][j][k][l] = classic_seq_edit_distance(trans_motif_1[i][0:j], trans_motif_2[k][0:l])
+    for i in range(row_1):
+        for j in range(col_1):
+            for k in range(row_2):
+                for l in range(col_1):
+                    c_matrix[i][j][k][l] = dc[i][j] + ic[k][l]
+                    # r_matrice[i][j][k][l] = classic_seq_edit_distance(motif_1[i][0:j], motif_2[k][0:l])
 
-    return c_matrice
+    return c_matrix
 
 
 def split_data(data, nprocs, rank):
@@ -204,6 +307,7 @@ def split_data(data, nprocs, rank):
     datas = [data[starts[p]:ends[p]] for p in range(nprocs)]
 
     return datas[rank]
+
 
 def list_to_same_file(file, datas):
     with open(file, 'a') as k_anon_table:

@@ -20,20 +20,21 @@ if args.columns is None:
 
 
 # Filling of T table
-def t_matrice_func(motif_1, motif_2):
-    rows_motif_1 = len(motif_1)
-    rows_motif_2 = len(motif_2)
+def t_matrice_func(x, y):
+    rows_motif_1 = len(x)
+    rows_motif_2 = len(y)
 
-    columns_motif_1 = len(motif_1[0])
-    columns_motif_2 = len(motif_2[0])
+    columns_motif_1 = len(x[0])
+    columns_motif_2 = len(y[0])
+
     start_pre_treatment = time.time()
-    dr_mat = utils.dr_matrice_func(rows_motif_1, columns_motif_1)
-    dc_mat = utils.dc_matrice_func(rows_motif_1, columns_motif_1)
-    ir_mat = utils.dr_matrice_func(rows_motif_2, columns_motif_2)
-    ic_mat = utils.dc_matrice_func(rows_motif_2, columns_motif_2)
+    dr_mat = utils.dr_matrice_func(x)
+    dc_mat = utils.dc_matrice_func(x)
+    ir_mat = utils.ir_matrice_func(y)
+    ic_mat = utils.ic_matrice_func(y)
 
-    r_mat = utils.r_matrice_func(motif_1, motif_2)
-    c_mat = utils.c_matrice_func(motif_1, motif_2)
+    r_mat = utils.r_matrice_func(x, y)
+    c_mat = utils.c_matrice_func(x, y)
     pre_treatment_time = time.time() - start_pre_treatment
 
     start_treatment = time.time()
@@ -80,11 +81,11 @@ def t_matrice_func(motif_1, motif_2):
                     t_matrice[i][j][k - 1][l] = max(val6, t_matrice[i - 1][j - 1][k - 1][l - 1] + c_mat[i][j][k][l] +
                                                     r_mat[i][j - 1][k][l - 1])
 
-    for i in range(rows_motif_1):
-        for j in range(columns_motif_1):
-            for k in range(rows_motif_2):
-                for l in range(columns_motif_2):
-                    print("[{}][{}][{}][{}] = ".format(i, j, k, l), t_matrice[i][j][k][l])
+    # for i in range(rows_motif_1):
+    #     for j in range(columns_motif_1):
+    #         for k in range(rows_motif_2):
+    #             for l in range(columns_motif_2):
+    #                 print("[{}][{}][{}][{}] = ".format(i, j, k, l), t_matrice[i][j][k][l])
 
     treatment_time = time.time() - start_treatment
     return pre_treatment_time, treatment_time

@@ -27,26 +27,26 @@ if args.columns is None:
 pre_treatment_time = 0.0
 
 
-def t_matrice_func(motif_1, motif_2):
+def t_matrice_func(x, y):
     start_pre_treatment = time.time()
 
-    rows_motif_1 = len(motif_1)
-    rows_motif_2 = len(motif_2)
+    rows_motif_1 = len(x)
+    rows_motif_2 = len(y)
 
-    columns_motif_1 = len(motif_1[0])
-    columns_motif_2 = len(motif_2[0])
+    columns_motif_1 = len(x[0])
+    columns_motif_2 = len(y[0])
 
-    my_motif_1 = utils.split_data(motif_1, nprocs, rank)
-    print(rank, " my motif length = ", my_motif_1)
+    my_motif_1 = utils.split_data(x, nprocs, rank)
+    # print(rank, " my motif length = ", my_motif_1)
 
     comm.barrier()
-    dr_mat = utils.dr_matrice_func(rows_motif_1, columns_motif_1)
-    dc_mat = utils.dc_matrice_func(rows_motif_1, columns_motif_1)
-    ir_mat = utils.dr_matrice_func(rows_motif_2, columns_motif_2)
-    ic_mat = utils.dc_matrice_func(rows_motif_2, columns_motif_2)
+    dr_mat = utils.dr_matrice_func(x)
+    dc_mat = utils.dc_matrice_func(x)
+    ir_mat = utils.ir_matrice_func(y)
+    ic_mat = utils.ic_matrice_func(y)
 
-    r_mat = utils.r_matrice_func(my_motif_1, motif_2)
-    c_mat = utils.c_matrice_func(my_motif_1, motif_2)
+    r_mat = utils.r_matrice_func(my_motif_1, y)
+    c_mat = utils.c_matrice_func(my_motif_1, y)
     root = 0
     row = 0
 
@@ -61,15 +61,13 @@ def t_matrice_func(motif_1, motif_2):
         all_r_mat = []
         all_c_mat = []
         # 4 dimension matrix initializations
-        for i in range(len(motif_1)):
-            assert isinstance(motif_1[0], str)
+        for i in range(rows_motif_1):
             inter_1 = []
-            for j in range(len(motif_1[0])):
+            for j in range(columns_motif_1):
                 inter_2 = []
-                for k in range(len(motif_2)):
-                    assert isinstance(motif_2[0], str)
+                for k in range(rows_motif_2):
                     inter_3 = []
-                    for l in range(len(motif_2[0])):
+                    for l in range(columns_motif_2):
                         inter_3.append(0)
                     inter_2.append(inter_3)
                 inter_1.append(inter_2)
@@ -82,16 +80,16 @@ def t_matrice_func(motif_1, motif_2):
             r_mat_prime = comm.recv(source=rk, tag=rk)
             # print(rank, " ", r_mat_prime[:1])
             for i in range(row):
-                for j in range(len(motif_1[0])):
-                    for k in range(len(motif_2)):
-                        for l in range(len(motif_2[0])):
+                for j in range(columns_motif_1):
+                    for k in range(rows_motif_2):
+                        for l in range(columns_motif_2):
                             all_r_mat[i][j][k][l] = r_mat_prime[i][j][k][l]
 
             c_mat_prime = comm.recv(source=rk, tag=rk)
             for i in range(row):
-                for j in range(len(motif_1[0])):
-                    for k in range(len(motif_2)):
-                        for l in range(len(motif_2[0])):
+                for j in range(columns_motif_1):
+                    for k in range(rows_motif_2):
+                        for l in range(columns_motif_2):
                             all_c_mat[i][j][k][l] = c_mat_prime[i][j][k][l]
 
     del c_mat
@@ -146,11 +144,11 @@ def t_matrice_func(motif_1, motif_2):
                                                         t_matrice[i - 1][j - 1][k - 1][l - 1] + all_c_mat[i][j][k][l] +
                                                         all_r_mat[i][j - 1][k][l - 1])
 
-        for i in range(rows_motif_1):
-            for j in range(columns_motif_1):
-                for k in range(rows_motif_2):
-                    for l in range(columns_motif_2):
-                        print("[{}][{}][{}][{}] = ".format(i, j, k, l), t_matrice[i][j][k][l])
+        # for i in range(rows_motif_1):
+        #     for j in range(columns_motif_1):
+        #         for k in range(rows_motif_2):
+        #             for l in range(columns_motif_2):
+        #                 print("[{}][{}][{}][{}] = ".format(i, j, k, l), t_matrice[i][j][k][l])
 
         treatment_time = time.time() - start_treatment
 
