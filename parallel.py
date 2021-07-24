@@ -132,17 +132,29 @@ def t_matrice_func(x, y):
             for j in range(1, columns_motif_1):
                 for k in range(1, rows_motif_2):
                     for l in range(1, columns_motif_2):
-                        val1 = max(t_matrice[i - 1][j][k][l] + dr_mat[i][rows_motif_1 - 1],
-                                   t_matrice[i][j - 1][k][l] + dc_mat[i][rows_motif_1 - 1])
-                        val2 = max(val1, t_matrice[i][j][k - 1][l] + ir_mat[i][rows_motif_2 - 1])
-                        val3 = max(val2, t_matrice[i][j][k - 1][l - 1] + ic_mat[i][rows_motif_2 - 1])
-                        val4 = max(val3, t_matrice[i - 1][j][k - 1][l] + all_r_mat[i][j][k][l])
-                        val5 = max(val4, t_matrice[i][j - 1][k][l - 1] + all_c_mat[i][j][k][l])
-                        val6 = max(val5, t_matrice[i - 1][j - 1][k - 1][l - 1] + all_c_mat[i - 1][j][k - 1][l] +
-                                   all_r_mat[i][j][k][l])
-                        t_matrice[i][j][k - 1][l] = max(val6,
-                                                        t_matrice[i - 1][j - 1][k - 1][l - 1] + all_c_mat[i][j][k][l] +
-                                                        all_r_mat[i][j - 1][k][l - 1])
+                        # val1 = max(t_matrice[i - 1][j][k][l] + dr_mat[i][rows_motif_1 - 1],
+                        #            t_matrice[i][j - 1][k][l] + dc_mat[i][rows_motif_1 - 1])
+                        # val2 = max(val1, t_matrice[i][j][k - 1][l] + ir_mat[i][rows_motif_2 - 1])
+                        # val3 = max(val2, t_matrice[i][j][k - 1][l - 1] + ic_mat[i][rows_motif_2 - 1])
+                        # val4 = max(val3, t_matrice[i - 1][j][k - 1][l] + all_r_mat[i][j][k][l])
+                        # val5 = max(val4, t_matrice[i][j - 1][k][l - 1] + all_c_mat[i][j][k][l])
+                        # val6 = max(val5, t_matrice[i - 1][j - 1][k - 1][l - 1] + all_c_mat[i - 1][j][k - 1][l] +
+                        #            all_r_mat[i][j][k][l])
+                        # t_matrice[i][j][k - 1][l] = max(val6,
+                        #                                 t_matrice[i - 1][j - 1][k - 1][l - 1] + all_c_mat[i][j][k][l] +
+                        #                                 all_r_mat[i][j - 1][k][l - 1])
+
+                        t_matrice[i][j][k - 1][l] = max(
+                            t_matrice[i - 1][j][k][l] + dr_mat[i][rows_motif_1 - 1],
+                            t_matrice[i][j - 1][k][l] + dc_mat[i][rows_motif_1 - 1],
+                            t_matrice[i][j][k - 1][l] + ir_mat[i][rows_motif_2 - 1],
+                            t_matrice[i][j][k - 1][l - 1] + ic_mat[i][rows_motif_2 - 1],
+                            t_matrice[i - 1][j][k - 1][l] + r_mat[i][j][k][l],
+                            t_matrice[i][j - 1][k][l - 1] + c_mat[i][j][k][l],
+                            t_matrice[i - 1][j - 1][k - 1][l - 1] + c_mat[i - 1][j][k - 1][l] + r_mat[i][j][k][l],
+                            t_matrice[i - 1][j - 1][k - 1][l - 1] + c_mat[i][j][k][l] + r_mat[i][j - 1][k][l - 1]
+                        )
+
 
         # for i in range(rows_motif_1):
         #     for j in range(columns_motif_1):
