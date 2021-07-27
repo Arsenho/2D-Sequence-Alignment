@@ -2,6 +2,7 @@ import utils
 import time
 import argparse
 import sys
+import numpy as np
 
 parser = argparse.ArgumentParser(sys.argv[0])
 parser.add_argument('--rows', type=int, nargs=1, help="Number of rows")
@@ -38,65 +39,37 @@ def t_matrice_func(x, y):
     pre_treatment_time = time.time() - start_pre_treatment
 
     start_treatment = time.time()
-    t_matrice = []
-    # 4 dimension matrix initializations
-    for i in range(rows_motif_1):
-        assert isinstance(motif_1[0], str)
-        inter_1 = []
-        for j in range(columns_motif_1):
-            inter_2 = []
-            for k in range(rows_motif_2):
-                assert isinstance(motif_2[0], str)
-                inter_3 = []
-                for l in range(columns_motif_2):
-                    inter_3.append(0)
-                inter_2.append(inter_3)
-            inter_1.append(inter_2)
-        t_matrice.append(inter_1)
+    t_matrix = np.zeros((rows_motif_1, columns_motif_1, rows_motif_2, columns_motif_2), dtype=int)
 
     # Initalization maginales of T table
     for i in range(rows_motif_1):
         for j in range(columns_motif_1):
             for k in range(rows_motif_2):
                 for l in range(columns_motif_2):
-                    t_matrice[i][j][k][l] = 0
-                    t_matrice[0][j][k][l] = (k + 1) * (l + 1)
-                    t_matrice[i][0][k][l] = (k + 1) * (l + 1)
-                    t_matrice[i][j][0][l] = (i + 1) * (j + 1)
-                    t_matrice[i][j][k][0] = (i + 1) * (j + 1)
+                    t_matrix[i][j][k][l] = 0
+                    t_matrix[0][j][k][l] = (k + 1) * (l + 1)
+                    t_matrix[i][0][k][l] = (k + 1) * (l + 1)
+                    t_matrix[i][j][0][l] = (i + 1) * (j + 1)
+                    t_matrix[i][j][k][0] = (i + 1) * (j + 1)
 
     # Filling of T table
     for i in range(1, rows_motif_1):
         for j in range(1, columns_motif_1):
             for k in range(1, rows_motif_2):
                 for l in range(1, columns_motif_2):
-                    # val1 = max(t_matrice[i - 1][j][k][l] + dr_mat[i][rows_motif_1 - 1],
-                    #            t_matrice[i][j - 1][k][l] + dc_mat[i][rows_motif_1 - 1])
-                    # val2 = max(val1, t_matrice[i][j][k - 1][l] + ir_mat[i][rows_motif_2 - 1])
-                    # val3 = max(val2, t_matrice[i][j][k - 1][l - 1] + ic_mat[i][rows_motif_2 - 1])
-                    # val4 = max(val3, t_matrice[i - 1][j][k - 1][l] + r_mat[i][j][k][l])
-                    # val5 = max(val4, t_matrice[i][j - 1][k][l - 1] + c_mat[i][j][k][l])
-                    # val6 = max(val5, t_matrice[i - 1][j - 1][k - 1][l - 1] + c_mat[i - 1][j][k - 1][l] +
-                    #            r_mat[i][j][k][l])
-                    t_matrice[i][j][k - 1][l] = max(
-                        t_matrice[i - 1][j][k][l] + dr_mat[i][rows_motif_1 - 1],
-                        t_matrice[i][j - 1][k][l] + dc_mat[i][rows_motif_1 - 1],
-                        t_matrice[i][j][k - 1][l] + ir_mat[i][rows_motif_2 - 1],
-                        t_matrice[i][j][k - 1][l - 1] + ic_mat[i][rows_motif_2 - 1],
-                        t_matrice[i - 1][j][k - 1][l] + r_mat[i][j][k][l],
-                        t_matrice[i][j - 1][k][l - 1] + c_mat[i][j][k][l],
-                        t_matrice[i - 1][j - 1][k - 1][l - 1] + c_mat[i - 1][j][k - 1][l] + r_mat[i][j][k][l],
-                        t_matrice[i - 1][j - 1][k - 1][l - 1] + c_mat[i][j][k][l] + r_mat[i][j - 1][k][l - 1]
+                    t_matrix[i][j][k - 1][l] = max(
+                        t_matrix[i - 1][j][k][l] + dr_mat[i][rows_motif_1 - 1],
+                        t_matrix[i][j - 1][k][l] + dc_mat[i][rows_motif_1 - 1],
+                        t_matrix[i][j][k - 1][l] + ir_mat[i][rows_motif_2 - 1],
+                        t_matrix[i][j][k - 1][l - 1] + ic_mat[i][rows_motif_2 - 1],
+                        t_matrix[i - 1][j][k - 1][l] + r_mat[i][j][k][l],
+                        t_matrix[i][j - 1][k][l - 1] + c_mat[i][j][k][l],
+                        t_matrix[i - 1][j - 1][k - 1][l - 1] + c_mat[i - 1][j][k - 1][l] + r_mat[i][j][k][l],
+                        t_matrix[i - 1][j - 1][k - 1][l - 1] + c_mat[i][j][k][l] + r_mat[i][j - 1][k][l - 1]
                     )
 
-    # for i in range(rows_motif_1):
-    #     for j in range(columns_motif_1):
-    #         for k in range(rows_motif_2):
-    #             for l in range(columns_motif_2):
-    #                 print("[{}][{}][{}][{}] = ".format(i, j, k, l), t_matrice[i][j][k][l])
-
     treatment_time = time.time() - start_treatment
-    return pre_treatment_time, treatment_time
+    return pre_treatment_time, treatment_time, t_matrix
 
 
 rows = args.rows[0]

@@ -1,4 +1,5 @@
 import csv
+import numpy as np
 
 ALL_DATASET_PATH = "input/datasets.txt"
 
@@ -21,6 +22,20 @@ def get_dataset(file_path):
     return dataset
 
 
+# def get_motif(rows=10, columns=10, dataset_pos=0):
+#     dataset_path = get_dataset_path(dataset_pos)
+#     dataset = get_dataset(dataset_path)
+#     # print(dataset[:50])
+#     motif = np.zeros((rows, columns), dtype=str)
+#     step = 0
+#     for cpt in range(rows):
+#         line = dataset[step:step + columns]
+#         print(line)
+#         for j in range(len(line)):
+#             motif[cpt][j] = line[j]
+#         step += columns
+#     return motif
+
 def get_motif(rows=10, columns=10, dataset_pos=0):
     dataset_path = get_dataset_path(dataset_pos)
     dataset = get_dataset(dataset_path)
@@ -30,7 +45,6 @@ def get_motif(rows=10, columns=10, dataset_pos=0):
     for cpt in range(rows):
         motif.append(dataset[step:step + columns])
         step += columns
-
     return motif
 
 
@@ -42,22 +56,16 @@ def classic_seq_edit_distance(motif_1, motif_2):
     motif_1_length = len(motif_1)
     motif_2_length = len(motif_2)
 
-    scores = []
     row = motif_1_length + 1
     column = motif_2_length + 1
 
-    # Initializing the scores list
-    for i in range(row):
-        inter = []
-        for j in range(column):
-            inter.append(0)
-        scores.append(inter)
+    scores = np.zeros((row, column), dtype=int)
 
-    for i in range(row):
-        scores[i][0] = i
-
-    for j in range(column):
-        scores[0][j] = j
+    # for i in range(row):
+    #     scores[i][0] = i
+    #
+    # for j in range(column):
+    #     scores[0][j] = j
 
     for i in range(1, row):
         for j in range(1, column):
@@ -90,17 +98,10 @@ def dr_matrice_func(x):
     assert isinstance(motif, list)
     assert isinstance(motif[0], str)
 
-    dr_matrix = []
-
     row = len(motif)
     column = len(motif[0])
 
-    # Initializing the scores list
-    for i in range(row):
-        inter = []
-        for j in range(column):
-            inter.append(0)
-        dr_matrix.append(inter)
+    dr_matrix = np.zeros((row, column), dtype=int)
 
     for i in range(0, row):
         for j in range(0, column):
@@ -119,17 +120,10 @@ def dc_matrice_func(x):
     assert isinstance(motif, list)
     assert isinstance(motif[0], str)
 
-    dc_matrix = []
-
     row = len(motif)
     column = len(motif[0])
 
-    # Initializing the scores list
-    for i in range(row):
-        inter = []
-        for j in range(column):
-            inter.append(0)
-        dc_matrix.append(inter)
+    dc_matrix = np.zeros((row, column), dtype=int)
 
     for i in range(0, row):
         for j in range(0, column):
@@ -148,19 +142,10 @@ def ir_matrice_func(y):
     assert isinstance(motif, list)
     assert isinstance(motif[0], str)
 
-    ir_matrix = []
-
     row = len(motif)
     column = len(motif[0])
 
-    # Initializing the scores list
-    for i in range(row):
-        inter = []
-        for j in range(column):
-            inter.append(0)
-
-        ir_matrix.append(inter)
-
+    ir_matrix = np.zeros((row, column), dtype=int)
     for i in range(0, row):
         for j in range(0, column):
             step = 0
@@ -178,17 +163,10 @@ def ic_matrice_func(y):
     assert isinstance(motif, list)
     assert isinstance(motif[0], str)
 
-    ic_matrix = []
-
     row = len(motif)
     column = len(motif[0])
 
-    # Initializing the scores list
-    for i in range(row):
-        inter = []
-        for j in range(column):
-            inter.append(0)
-        ic_matrix.append(inter)
+    ic_matrix = np.zeros((row, column), dtype=int)
 
     for i in range(0, row):
         for j in range(0, column):
@@ -201,26 +179,8 @@ def ic_matrice_func(y):
     return ic_matrix
 
 
-# Filling of Dc table
-# def dc_matrice_func(rows=10, columns=10):
-#     dc_matrix = []
-#     for i in range(rows):
-#         inter = []
-#         for j in range(columns):
-#             inter.append(0)
-#         dc_matrix.append(inter)
-#
-#     for i in range(rows):
-#         for j in range(columns):
-#             dc_matrix[i][j] = i + 1
-#
-#     return dc_matrix
-
-
 # Filling of R table
 def r_matrice_func(x, y):
-    r_matrix = []
-
     assert isinstance(x, list)
     assert isinstance(y, list)
 
@@ -232,18 +192,7 @@ def r_matrice_func(x, y):
     row_2 = len(y)
     col_2 = len(y[0])
 
-    # 4 dimension matrix initializations
-    for i in range(row_1):
-        inter_1 = []
-        for j in range(col_1):
-            inter_2 = []
-            for k in range(row_2):
-                inter_3 = []
-                for l in range(col_2):
-                    inter_3.append(0)
-                inter_2.append(inter_3)
-            inter_1.append(inter_2)
-        r_matrix.append(inter_1)
+    r_matrix = np.zeros((row_1, col_1, row_2, col_2), dtype=int)
 
     # Building result
     for i in range(row_1):
@@ -258,8 +207,6 @@ def r_matrice_func(x, y):
 
 # Filling of C table
 def c_matrice_func(x, y):
-    c_matrix = []
-
     assert isinstance(x, list)
     assert isinstance(y, list)
 
@@ -271,18 +218,7 @@ def c_matrice_func(x, y):
     row_2 = len(y)
     col_2 = len(y[0])
 
-    # 4 dimension matrix initializations
-    for i in range(row_1):
-        inter_1 = []
-        for j in range(col_1):
-            inter_2 = []
-            for k in range(row_2):
-                inter_3 = []
-                for l in range(col_2):
-                    inter_3.append(0)
-                inter_2.append(inter_3)
-            inter_1.append(inter_2)
-        c_matrix.append(inter_1)
+    c_matrix = np.zeros((row_1, col_1, row_2, col_2), dtype=int)
 
     # Building result
     for i in range(row_1):

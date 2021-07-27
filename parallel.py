@@ -3,7 +3,7 @@ import mpi4py.MPI as MPI
 import time
 import argparse
 import sys
-
+import numpy as np
 
 comm = MPI.COMM_WORLD
 nprocs = comm.Get_size()
@@ -52,117 +52,93 @@ def t_matrice_func(x, y):
 
     comm.barrier()
 
-    if rank != 0:
-        row = len(my_motif_1)
-        comm.send(row, dest=root, tag=rank)
-        comm.send(r_mat, dest=root, tag=rank)
-        comm.send(c_mat, dest=root, tag=rank)
-    else:
-        all_r_mat = []
-        all_c_mat = []
-        # 4 dimension matrix initializations
-        for i in range(rows_motif_1):
-            inter_1 = []
-            for j in range(columns_motif_1):
-                inter_2 = []
-                for k in range(rows_motif_2):
-                    inter_3 = []
-                    for l in range(columns_motif_2):
-                        inter_3.append(0)
-                    inter_2.append(inter_3)
-                inter_1.append(inter_2)
-            all_r_mat.append(inter_1)
-            all_c_mat.append(inter_1)
+    # if rank != 0:
+    #     row = len(my_motif_1)
+    #     comm.send(row, dest=root, tag=rank)
+    #     comm.send(r_mat, dest=root, tag=rank)
+    #     comm.send(c_mat, dest=root, tag=rank)
+    # else:
+    #     all_r_mat = []
+    #     all_c_mat = []
+    #     # 4 dimension matrix initializations
+    #     for i in range(rows_motif_1):
+    #         inter_1 = []
+    #         for j in range(columns_motif_1):
+    #             inter_2 = []
+    #             for k in range(rows_motif_2):
+    #                 inter_3 = []
+    #                 for l in range(columns_motif_2):
+    #                     inter_3.append(0)
+    #                 inter_2.append(inter_3)
+    #             inter_1.append(inter_2)
+    #         all_r_mat.append(inter_1)
+    #         all_c_mat.append(inter_1)
+    #
+    #     for rk in range(1, nprocs):
+    #         row = comm.recv(source=rk, tag=rk)
+    #
+    #         r_mat_prime = comm.recv(source=rk, tag=rk)
+    #         # print(rank, " ", r_mat_prime[:1])
+    #         for i in range(row):
+    #             for j in range(columns_motif_1):
+    #                 for k in range(rows_motif_2):
+    #                     for l in range(columns_motif_2):
+    #                         all_r_mat[i][j][k][l] = r_mat_prime[i][j][k][l]
+    #
+    #         c_mat_prime = comm.recv(source=rk, tag=rk)
+    #         for i in range(row):
+    #             for j in range(columns_motif_1):
+    #                 for k in range(rows_motif_2):
+    #                     for l in range(columns_motif_2):
+    #                         all_c_mat[i][j][k][l] = c_mat_prime[i][j][k][l]
 
-        for rk in range(1, nprocs):
-            row = comm.recv(source=rk, tag=rk)
-
-            r_mat_prime = comm.recv(source=rk, tag=rk)
-            # print(rank, " ", r_mat_prime[:1])
-            for i in range(row):
-                for j in range(columns_motif_1):
-                    for k in range(rows_motif_2):
-                        for l in range(columns_motif_2):
-                            all_r_mat[i][j][k][l] = r_mat_prime[i][j][k][l]
-
-            c_mat_prime = comm.recv(source=rk, tag=rk)
-            for i in range(row):
-                for j in range(columns_motif_1):
-                    for k in range(rows_motif_2):
-                        for l in range(columns_motif_2):
-                            all_c_mat[i][j][k][l] = c_mat_prime[i][j][k][l]
-
-    del c_mat
-    del r_mat
+    # del c_mat
+    # del r_mat
 
     comm.barrier()
     pre_treatment_time = time.time() - start_pre_treatment
 
-    if rank == 0:
-        start_treatment = time.time()
-        t_matrice = []
-        # 4 dimension matrix initializations
-        for i in range(rows_motif_1):
-            assert isinstance(motif_1[0], str)
-            inter_1 = []
-            for j in range(columns_motif_1):
-                inter_2 = []
-                for k in range(rows_motif_2):
-                    assert isinstance(motif_2[0], str)
-                    inter_3 = []
-                    for l in range(columns_motif_2):
-                        inter_3.append(0)
-                    inter_2.append(inter_3)
-                inter_1.append(inter_2)
-            t_matrice.append(inter_1)
+    # if rank == 0:
+    start_treatment = time.time()
+    rows_my_motif_1 = len(my_motif_1)
 
-        # Initalization maginales of T table
-        for i in range(rows_motif_1):
-            for j in range(columns_motif_1):
-                for k in range(rows_motif_2):
-                    for l in range(columns_motif_2):
-                        t_matrice[i][j][k][l] = 0
-                        t_matrice[0][j][k][l] = (k + 1) * (l + 1)
-                        t_matrice[i][0][k][l] = (k + 1) * (l + 1)
-                        t_matrice[i][j][0][l] = (i + 1) * (j + 1)
-                        t_matrice[i][j][k][0] = (i + 1) * (j + 1)
+    t_matrix = np.zeros((rows_motif_1, columns_motif_1, rows_motif_2, columns_motif_2), dtype=int)
 
-        # Filling of T table
-        for i in range(1, rows_motif_1):
-            for j in range(1, columns_motif_1):
-                for k in range(1, rows_motif_2):
-                    for l in range(1, columns_motif_2):
-                        # val1 = max(t_matrice[i - 1][j][k][l] + dr_mat[i][rows_motif_1 - 1],
-                        #            t_matrice[i][j - 1][k][l] + dc_mat[i][rows_motif_1 - 1])
-                        # val2 = max(val1, t_matrice[i][j][k - 1][l] + ir_mat[i][rows_motif_2 - 1])
-                        # val3 = max(val2, t_matrice[i][j][k - 1][l - 1] + ic_mat[i][rows_motif_2 - 1])
-                        # val4 = max(val3, t_matrice[i - 1][j][k - 1][l] + all_r_mat[i][j][k][l])
-                        # val5 = max(val4, t_matrice[i][j - 1][k][l - 1] + all_c_mat[i][j][k][l])
-                        # val6 = max(val5, t_matrice[i - 1][j - 1][k - 1][l - 1] + all_c_mat[i - 1][j][k - 1][l] +
-                        #            all_r_mat[i][j][k][l])
-                        # t_matrice[i][j][k - 1][l] = max(val6,
-                        #                                 t_matrice[i - 1][j - 1][k - 1][l - 1] + all_c_mat[i][j][k][l] +
-                        #                                 all_r_mat[i][j - 1][k][l - 1])
-
-                        t_matrice[i][j][k - 1][l] = max(
-                            t_matrice[i - 1][j][k][l] + dr_mat[i][rows_motif_1 - 1],
-                            t_matrice[i][j - 1][k][l] + dc_mat[i][rows_motif_1 - 1],
-                            t_matrice[i][j][k - 1][l] + ir_mat[i][rows_motif_2 - 1],
-                            t_matrice[i][j][k - 1][l - 1] + ic_mat[i][rows_motif_2 - 1],
-                            t_matrice[i - 1][j][k - 1][l] + r_mat[i][j][k][l],
-                            t_matrice[i][j - 1][k][l - 1] + c_mat[i][j][k][l],
-                            t_matrice[i - 1][j - 1][k - 1][l - 1] + c_mat[i - 1][j][k - 1][l] + r_mat[i][j][k][l],
-                            t_matrice[i - 1][j - 1][k - 1][l - 1] + c_mat[i][j][k][l] + r_mat[i][j - 1][k][l - 1]
-                        )
+    # Initalization maginales of T table
+    for i in range(rows_my_motif_1):
+        for j in range(columns_motif_1):
+            for k in range(rows_motif_2):
+                for l in range(columns_motif_2):
+                    t_matrix[i][j][k][l] = 0
+                    t_matrix[0][j][k][l] = (k + 1) * (l + 1)
+                    t_matrix[i][0][k][l] = (k + 1) * (l + 1)
+                    t_matrix[i][j][0][l] = (i + 1) * (j + 1)
+                    t_matrix[i][j][k][0] = (i + 1) * (j + 1)
 
 
-        # for i in range(rows_motif_1):
-        #     for j in range(columns_motif_1):
-        #         for k in range(rows_motif_2):
-        #             for l in range(columns_motif_2):
-        #                 print("[{}][{}][{}][{}] = ".format(i, j, k, l), t_matrice[i][j][k][l])
+    # Filling of T table
+    for i in range(1, rows_my_motif_1):
+        for j in range(1, columns_motif_1):
+            for k in range(1, rows_motif_2):
+                for l in range(1, columns_motif_2):
+                    t_matrix[i][j][k - 1][l] = max(
+                        t_matrix[i - 1][j][k][l] + dr_mat[i][rows_motif_1 - 1],
+                        t_matrix[i][j - 1][k][l] + dc_mat[i][rows_motif_1 - 1],
+                        t_matrix[i][j][k - 1][l] + ir_mat[i][rows_motif_2 - 1],
+                        t_matrix[i][j][k - 1][l - 1] + ic_mat[i][rows_motif_2 - 1],
+                        t_matrix[i - 1][j][k - 1][l] + r_mat[i][j][k][l],
+                        t_matrix[i][j - 1][k][l - 1] + c_mat[i][j][k][l],
+                        t_matrix[i - 1][j - 1][k - 1][l - 1] + c_mat[i - 1][j][k - 1][l] + r_mat[i][j][k][l],
+                        t_matrix[i - 1][j - 1][k - 1][l - 1] + c_mat[i][j][k][l] + r_mat[i][j - 1][k][l - 1]
+                    )
 
-        treatment_time = time.time() - start_treatment
+    # for i in range(rows_motif_1):
+    #     for j in range(columns_motif_1):
+    #         for k in range(rows_motif_2):
+    #             for l in range(columns_motif_2):
+    #                 print("[{}][{}][{}][{}] = ".format(i, j, k, l), t_matrice[i][j][k][l])
+
+    treatment_time = time.time() - start_treatment
 
     comm.barrier()
     global_pre_treatment_time = comm.reduce(pre_treatment_time, op=MPI.SUM, root=0)
@@ -192,4 +168,3 @@ if rank == 0:
 
     print(rank, " Computations = ", result)
     print(rank, " Global computation time = ", end)
-

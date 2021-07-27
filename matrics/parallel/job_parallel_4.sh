@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=PARAL-KANON-10000
+#SBATCH --job-name=PARALLEL-150
 #SBATCH --partition=normal            # submission queue (normal or bigmem)
 #SBATCH --time=02-00:00:00            # 1-1 means one day and one hour
 #SBATCH --mail-type=ALL    # Type can be BEGIN, END, FAIL, ALL(any state change).
@@ -37,13 +37,10 @@ echo "----"
 # special commands for openmpi/intel
 module load openmpi/intel-opa/gcc/64/1.10.4-hfi
 
-
 export CC=/cm/local/apps/gcc/8.2.0/bin/gcc && export CXX=/cm/local/apps/gcc/8.2.0/bin/g++
-cd anonymity/build/ && /users/adjeufack/install/bin/cmake .. && make
-cd ../.. && cp anonymity/build/anonymity.so .
 
 #make clean all
 
 #pip install mpi4py
 
-python2.7 main_allparallel_2.py
+python3 main_parallel_4.py

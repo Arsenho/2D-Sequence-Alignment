@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=SEQUENTIAL-80
+#SBATCH --job-name=SEQUENTIAL-120
 #SBATCH --partition=normal            # submission queue (normal or bigmem)
 #SBATCH --time=02-00:00:00            # 1-1 means one day and one hour
 #SBATCH --mail-type=ALL    # Type can be BEGIN, END, FAIL, ALL(any state change).
@@ -43,4 +43,4 @@ export CC=/cm/local/apps/gcc/8.2.0/bin/gcc && export CXX=/cm/local/apps/gcc/8.2.
 
 #pip install mpi
 
-python3 serial.py --rows 80 --columns 80
+python3 serial.py --rows 120 --columns 120
